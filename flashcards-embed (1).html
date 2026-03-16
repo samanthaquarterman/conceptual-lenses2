@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conceptual Lenses – Flashcards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #F8FAFC;
+    font-family: system-ui, -apple-system, sans-serif;
+    padding: 2.5rem 1.25rem;
+    color: #0F172A;
+  }
+
+  .wrapper { max-width: 960px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 2rem;
+  }
+  .eyebrow {
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #94A3B8; margin-bottom: 0.5rem;
+  }
+  .header h1 {
+    font-family: Georgia, serif;
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    font-weight: 700; color: #0F172A;
+    line-height: 1.25; margin-bottom: 0.9rem;
+  }
+  .intro { font-size: 0.95rem; color: #475569; line-height: 1.7; max-width: 640px; }
+  .instruction-box {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #F1F5F9;
+    border-radius: 0.5rem;
+    border-left: 3px solid #CBD5E1;
+    font-size: 0.875rem; color: #64748B; line-height: 1.6;
+  }
+
+  /* ── Legend ── */
+  .legend { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px; flex-shrink: 0;
+  }
+  .legend-label { font-size: 0.7rem; font-weight: 600; color: #64748B; letter-spacing: 0.05em; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: flex; gap: 1.75rem;
+    flex-wrap: wrap; justify-content: center;
+    margin-bottom: 3rem;
+  }
+
+  /* ── Flip card ── */
+  .card-wrap { display: flex; flex-direction: column; align-items: center; }
+
+  .selection-ring {
+    border-radius: 1rem; padding: 3px;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-bottom: 0.6rem;
+  }
+  .selection-ring.selected-1 { background: #2563EB; }
+  .selection-ring.selected-2 { background: #16A34A; }
+  .selection-ring.selected-3 { background: #EA580C; }
+
+  .scene {
+    width: 270px; height: 370px;
+    perspective: 1200px;
+  }
+  .card-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+    cursor: pointer;
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; inset: 0;
+    border-radius: 0.875rem;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+
+  /* FRONT */
+  .card-front {
+    background: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem 1.5rem;
+  }
+  .card-front .accent-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 6px; border-radius: 0.875rem 0.875rem 0 0;
+  }
+  .card-front .icon-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 1.25rem;
+  }
+  .card-front .card-label {
+    font-family: Georgia, serif;
+    font-size: 1.15rem; font-weight: 700;
+    color: #1E293B; text-align: center;
+    line-height: 1.3; margin-bottom: 0.45rem;
+  }
+  .card-front .card-tagline {
+    font-family: Georgia, serif;
+    font-size: 0.875rem; font-style: italic;
+    text-align: center; margin-bottom: 2rem;
+  }
+  .card-front .flip-hint {
+    font-size: 0.65rem; color: #94A3B8;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  /* BACK */
+  .card-back {
+    transform: rotateY(180deg);
+    display: flex; flex-direction: column;
+    padding: 1.25rem; overflow-y: auto;
+  }
+  .card-back .scholar {
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .card-back .body-text {
+    font-family: Georgia, serif;
+    font-size: 0.78rem; color: #1E293B;
+    line-height: 1.55; margin-bottom: 0.6rem;
+  }
+  .card-back .note-text {
+    font-size: 0.72rem; color: #475569;
+    font-style: italic; line-height: 1.5;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+  }
+  .card-back .ask-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .card-back ul { padding-left: 1rem; }
+  .card-back ul li {
+    font-size: 0.7rem; color: #334155;
+    line-height: 1.55; margin-bottom: 0.2rem;
+  }
+
+  /* Card label below */
+  .card-status {
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #94A3B8;
+    display: flex; align-items: center; gap: 0.35rem;
+    transition: color 0.3s;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #CBD5E1; display: inline-block;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  /* ── Try It ── */
+
+
+  /* ── Footer ── */
+  .footer-note {
+    text-align: center; margin-top: 2rem;
+    font-size: 0.7rem; color: #94A3B8;
+    letter-spacing: 0.05em;
+  }
+  .ai-note {
+    margin-top: 1.5rem;
+    font-size: 0.7rem; color: #94A3B8;
+    font-style: italic; line-height: 1.6;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">Section 2 · Conceptualizing</div>
+    <h1>Apply Conceptual Lenses</h1>
+    <p class="intro">
+      Now we shift from <em>noticing</em> to <em>interpreting</em>. Rather than asking whether AI outputs are correct or incorrect, these lenses help us examine how representation is constructed and whose perspectives may be centered or omitted — a form of critical media literacy essential for participatory digital cultures (Jenkins et al., 2009; Garcia &amp; Morrell, 2013).
+    </p>
+    <div class="instruction-box">
+      Select one or more lenses. There is no single correct answer. Use specific evidence from the artifact to justify your reasoning.
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#2563EB"></div>
+      <span class="legend-label">Training Data Gap</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#16A34A"></div>
+      <span class="legend-label">Homogenized Narrative</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#EA580C"></div>
+      <span class="legend-label">Algorithmic Bias</span>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="card-grid">
+
+    <!-- Card 1: Training Data Gap (Blue) -->
+    <div class="card-wrap">
+      <div class="selection-ring" id="ring-1" onclick="toggleSelect(1)">
+        <div class="scene">
+          <div class="card-inner" id="card-1" onclick="event.stopPropagation(); flipCard(1)">
+            <div class="card-face card-front" style="border: 2px solid #93C5FD; box-shadow: 0 4px 24px #2563EB22;">
+              <div class="accent-bar" style="background:#2563EB"></div>
+              <div class="icon-circle" style="background:#DBEAFE">🔍</div>
+              <div class="card-label">Training Data Gap</div>
+              <div class="card-tagline" style="color:#2563EB">What&#39;s missing?</div>
+              <div class="flip-hint">Tap to reveal →</div>
+            </div>
+            <div class="card-face card-back" style="background:#DBEAFE; border: 2px solid #93C5FD; box-shadow: 0 4px 24px #2563EB22;">
+              <div class="scholar" style="color:#2563EB">Crawford, 2021 · Noble, 2018</div>
+              <p class="body-text">AI systems are trained on large-scale datasets shaped by historical and cultural dominance. Certain communities, languages, and knowledge systems are underrepresented or absent — not by accident, but because of whose perspectives shaped the available data.</p>
+              <p class="note-text" style="border-left: 3px solid #2563EB;">Use this lens to notice where voices, communities, or knowledge systems may be missing. Absence is not neutral — it reflects whose perspectives were treated as worth including (Crawford, 2021).</p>
+              <div class="ask-label" style="color:#2563EB">Ask:</div>
+              <ul>
+                <li>Whose perspectives appear most visible?</li>
+                <li>What voices seem generalized or missing?</li>
+                <li>Where should specificity exist, but doesn&#39;t?</li>
+                <li>What knowledge systems are treated as universal?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-status" id="status-1">
+        <span class="status-dot" id="dot-1"></span>
+        <span id="status-text-1">Click to select</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Homogenized Narrative (Green) -->
+    <div class="card-wrap">
+      <div class="selection-ring" id="ring-2" onclick="toggleSelect(2)">
+        <div class="scene">
+          <div class="card-inner" id="card-2" onclick="event.stopPropagation(); flipCard(2)">
+            <div class="card-face card-front" style="border: 2px solid #86EFAC; box-shadow: 0 4px 24px #16A34A22;">
+              <div class="accent-bar" style="background:#16A34A"></div>
+              <div class="icon-circle" style="background:#DCFCE7">🔄</div>
+              <div class="card-label">Homogenized Narrative</div>
+              <div class="card-tagline" style="color:#16A34A">What gets smoothed into &#8220;neutral&#8221;?</div>
+              <div class="flip-hint">Tap to reveal →</div>
+            </div>
+            <div class="card-face card-back" style="background:#DCFCE7; border: 2px solid #86EFAC; box-shadow: 0 4px 24px #16A34A22;">
+              <div class="scholar" style="color:#16A34A">Noble, 2018 · New London Group, 1996</div>
+              <p class="body-text">Generative AI often produces broadly acceptable and professionally &#8220;safe&#8221; responses. Complexity is flattened into dominant narratives that appear neutral or universal — but reflect particular cultural assumptions about what counts as normal (Noble, 2018).</p>
+              <p class="note-text" style="border-left: 3px solid #16A34A;">Use this lens to notice where difference, conflict, or nuance has been reduced into a single &#8220;acceptable&#8221; version. What is presented as common sense may actually be a particular worldview (New London Group, 1996).</p>
+              <div class="ask-label" style="color:#16A34A">Ask:</div>
+              <ul>
+                <li>Does this output smooth over conflict or difference?</li>
+                <li>What tone is presented as &#8220;normal&#8221; or professional?</li>
+                <li>What complexity is reduced or erased?</li>
+                <li>Whose definition of success is assumed?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-status" id="status-2">
+        <span class="status-dot" id="dot-2"></span>
+        <span id="status-text-2">Click to select</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Algorithmic Bias (Orange) -->
+    <div class="card-wrap">
+      <div class="selection-ring" id="ring-3" onclick="toggleSelect(3)">
+        <div class="scene">
+          <div class="card-inner" id="card-3" onclick="event.stopPropagation(); flipCard(3)">
+            <div class="card-face card-front" style="border: 2px solid #FDBA74; box-shadow: 0 4px 24px #EA580C22;">
+              <div class="accent-bar" style="background:#EA580C"></div>
+              <div class="icon-circle" style="background:#FFEDD5">⚖️</div>
+              <div class="card-label">Algorithmic Bias</div>
+              <div class="card-tagline" style="color:#EA580C">Who benefits from this framing?</div>
+              <div class="flip-hint">Tap to reveal →</div>
+            </div>
+            <div class="card-face card-back" style="background:#FFEDD5; border: 2px solid #FDBA74; box-shadow: 0 4px 24px #EA580C22;">
+              <div class="scholar" style="color:#EA580C">Crawford, 2021 · Noble, 2018 · Turvey &amp; Pachler, 2016</div>
+              <p class="body-text">Algorithmic bias occurs when systems reproduce patterns embedded in training data or model design. These are not random errors — they reflect the social and institutional contexts in which AI systems are built (Turvey &amp; Pachler, 2016).</p>
+              <p class="note-text" style="border-left: 3px solid #EA580C;">Use this lens to examine whose worldview is treated as default — and who is made invisible or marginal as a result. Bias is structural, not accidental (Crawford, 2021; Noble, 2018).</p>
+              <div class="ask-label" style="color:#EA580C">Ask:</div>
+              <ul>
+                <li>What worldview is privileged?</li>
+                <li>Who benefits from this being treated as the default?</li>
+                <li>Who might feel unseen or excluded?</li>
+                <li>What institutional assumptions are embedded?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-status" id="status-3">
+        <span class="status-dot" id="dot-3"></span>
+        <span id="status-text-3">Click to select</span>
+      </div>
+    </div>
+
+  </div><!-- /card-grid -->
+
+  <p class="footer-note">Tap any card to flip &nbsp;·&nbsp; Click the card border to select a lens</p>
+  <p class="ai-note">AI Use Note: This interactive component was designed and built with the assistance of Claude (Anthropic, 2026). The conceptual content, theoretical framing, and scholarship were developed by the author using cited sources.</p>
+
+</div>
+
+<script>
+  const cardData = {
+    1: { label: "Training Data Gap",     color: "#2563EB", colorLight: "#DBEAFE", colorMid: "#93C5FD" },
+    2: { label: "Homogenized Narrative", color: "#16A34A", colorLight: "#DCFCE7", colorMid: "#86EFAC" },
+    3: { label: "Algorithmic Bias",      color: "#EA580C", colorLight: "#FFEDD5", colorMid: "#FDBA74" },
+  };
+
+  const flipped = { 1: false, 2: false, 3: false };
+  const selected = new Set();
+
+  function flipCard(id) {
+    flipped[id] = !flipped[id];
+    document.getElementById('card-' + id).classList.toggle('flipped', flipped[id]);
+  }
+
+  function toggleSelect(id) {
+    if (selected.has(id)) {
+      selected.delete(id);
+    } else {
+      selected.add(id);
+    }
+    updateUI();
+  }
+
+  function updateUI() {
+    [1, 2, 3].forEach(id => {
+      const c = cardData[id];
+      const ring = document.getElementById('ring-' + id);
+      const dot = document.getElementById('dot-' + id);
+      const statusText = document.getElementById('status-text-' + id);
+      const status = document.getElementById('status-' + id);
+
+      if (selected.has(id)) {
+        ring.style.background = c.color;
+        dot.style.background = c.color;
+        status.style.color = c.color;
+        statusText.textContent = 'Selected';
+      } else {
+        ring.style.background = 'transparent';
+        dot.style.background = '#CBD5E1';
+        status.style.color = '#94A3B8';
+        statusText.textContent = 'Click to select';
+      }
+    });
+
+
+  }
+</script>
+</body>
+</html>
